@@ -1,6 +1,6 @@
 import { apiRequest } from './api'
 
-// Price kabhi nahi bhejte. Sirf product id aur quantity.
+// Never send prices. Only product id and quantity; the server calculates the total.
 export async function placeOrder(token, form, cartItems) {
   const data = await apiRequest('/api/order', {
     method: 'POST',

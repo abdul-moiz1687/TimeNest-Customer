@@ -7,7 +7,7 @@ import Pagination from './Pagination'
 
 const LIMIT = 12
 
-// Shop aur Category dono pages yehi use karte hain
+// Shared by the Shop and Category pages
 export default function ProductListing({ fixedCategory }) {
   const [sp, setSp] = useSearchParams()
   const [state, setState] = useState({ loading: true, error: '', products: [], total: 0, pages: 1 })

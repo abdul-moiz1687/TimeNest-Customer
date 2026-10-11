@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-// Image ki zaroorat nahi: ek SVG clock jo asli waqt dikhata hai
+// Pure SVG analog clock that shows the visitor's current time (no image needed)
 export default function ClockArt({ className = '' }) {
   const [t] = useState(() => {
     const d = new Date()

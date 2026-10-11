@@ -14,7 +14,7 @@ const imgUrl = (i) => {
   return u.startsWith('http') || !u ? u : `${API_BASE_URL}${u.startsWith('/') ? '' : '/'}${u}`
 }
 
-// Backend ke alag field names ko ek standard shape mein badalta hai
+// Maps the API's field names to one consistent product shape
 export function normalizeProduct(p = {}) {
   const images = (Array.isArray(p.images) ? p.images : []).map(imgUrl).filter(Boolean)
   const main = imgUrl(p.image) || images[0] || ''

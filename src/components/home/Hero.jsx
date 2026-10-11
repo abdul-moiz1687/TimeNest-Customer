@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'motion/react'
 
@@ -7,25 +7,26 @@ const ease = [0.22, 1, 0.36, 1]
 
 export default function Hero() {
   const videoRef = useRef(null)
-  const [reduced, setReduced] = useState(false)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const update = () => setReduced(mq.matches)
-    update()
-    mq.addEventListener('change', update)
-    return () => mq.removeEventListener('change', update)
-  }, [])
 
   useEffect(() => {
     const v = videoRef.current
     if (!v) return
-    // React kabhi muted attribute DOM mein nahi lagata, isliye browser autoplay block kar deta hai
+    // React does not always render the `muted` attribute, and browsers block unmuted autoplay
     v.muted = true
     v.defaultMuted = true
-    if (reduced) { v.pause(); return }
-    v.play().catch((e) => console.warn('Hero video play nahi hui:', e.message))
-  }, [reduced])
+    let cleanup = () => {}
+    v.play().catch(() => {
+      // Autoplay blocked (e.g. low-power mode): start on the first touch or click instead
+      const start = () => v.play().catch(() => {})
+      window.addEventListener('touchstart', start, { once: true, passive: true })
+      window.addEventListener('click', start, { once: true })
+      cleanup = () => {
+        window.removeEventListener('touchstart', start)
+        window.removeEventListener('click', start)
+      }
+    })
+    return () => cleanup()
+  }, [])
 
   return (
     <section className="hero">
@@ -36,9 +37,10 @@ export default function Hero() {
         muted
         loop
         playsInline
+        disableRemotePlayback
         preload="auto"
         aria-hidden="true"
-        onError={() => console.warn('Hero video load nahi hui. /videos/timenest-hero.mp4 check karo.')}
+        onError={() => console.warn('Hero video failed to load. Check /videos/timenest-hero.mp4')}
       >
         <source src="/videos/timenest-hero.mp4" type="video/mp4" />
       </video>

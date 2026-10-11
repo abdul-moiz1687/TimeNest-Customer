@@ -1,6 +1,6 @@
 import { SITE_URL } from '../utils/format'
 
-// React 19 <title>, <meta>, <link> ko khud <head> mein bhej deta hai
+// React 19 hoists <title>, <meta> and <link> into <head> automatically
 export default function Seo({ title, description, path = '/', image, type = 'website', jsonLd }) {
   const fullTitle = title ? `${title} | TimeNest` : 'TimeNest | Premium Designer Wall Clocks'
   const url = `${SITE_URL}${path}`

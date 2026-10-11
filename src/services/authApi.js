@@ -1,6 +1,6 @@
 import { apiRequest } from './api'
 
-// Backend response alag shape mein ho sakta hai, isliye dono handle kiye hain
+// Handles both `{ token, user }` and flat response shapes
 function normalizeAuth(data) {
   const token = data.token || data.accessToken
   const user = data.user || (({ token: _t, accessToken: _a, message: _m, ...rest }) => rest)(data)
@@ -13,7 +13,7 @@ export async function login(email, password) {
 
 export async function signup(name, email, password) {
   const data = await apiRequest('/api/user/signup', { method: 'POST', body: { name, email, password } })
-  // Agar signup token nahi deta to login kara lo
+  // If signup does not return a token, log the user in right away
   if (!(data.token || data.accessToken)) return login(email, password)
   return normalizeAuth(data)
 }

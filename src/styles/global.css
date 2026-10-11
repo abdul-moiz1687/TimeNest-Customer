@@ -19,5 +19,5 @@ button { font: inherit; cursor: pointer; }
 .container { width: min(100% - 2rem, var(--container)); margin-inline: auto; }
 
 @media (prefers-reduced-motion: reduce) {
-  * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  html { scroll-behavior: auto; }
 }

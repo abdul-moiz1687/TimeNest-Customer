@@ -3,7 +3,7 @@ import { faClock } from '@fortawesome/free-solid-svg-icons'
 
 const ITEMS = ['Modern', 'Luxury', 'Wooden', 'Decorative', 'Office', 'Cash on Delivery']
 
-// Dobara repeat karte hain taake loop beech mein toote nahi
+// Content is rendered twice so the loop never shows a gap
 export default function Marquee() {
   return (
     <div className="marquee" aria-hidden="true">

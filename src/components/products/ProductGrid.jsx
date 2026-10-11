@@ -8,7 +8,7 @@ export default function ProductGrid({ loading, error, products, count = 8 }) {
       </div>
     )
   if (error) return <p className="notice error">{error}</p>
-  if (!products.length) return <p className="notice">Koi product nahi mila.</p>
+  if (!products.length) return <p className="notice">No products found. Try changing your filters.</p>
   return (
     <div className="p-grid">
       {products.map((p) => <ProductCard key={p.id} product={p} />)}

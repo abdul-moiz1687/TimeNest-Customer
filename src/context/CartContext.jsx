@@ -10,7 +10,7 @@ export function CartProvider({ children }) {
 
   useEffect(() => { localStorage.setItem(KEY, JSON.stringify(items)) }, [items])
 
-  // Cart mein sirf display ke liye price rakhte hain. Asli price backend calculate karta hai.
+  // Prices here are for display only. The backend calculates the real total.
   const addItem = (p, qty = 1) =>
     setItems((prev) => {
       const found = prev.find((i) => i.id === p.id)

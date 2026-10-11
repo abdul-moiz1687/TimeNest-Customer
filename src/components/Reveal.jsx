@@ -1,6 +1,6 @@
 import { motion } from 'motion/react'
 
-// Scroll karne par halka sa fade-up. Sirf ek baar chalta hai.
+// Subtle fade-up when scrolled into view. Plays once.
 export default function Reveal({ children, delay = 0, y = 28, className }) {
   return (
     <motion.div

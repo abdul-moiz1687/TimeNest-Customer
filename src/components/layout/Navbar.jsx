@@ -29,7 +29,7 @@ export default function Navbar() {
   const navigate = useNavigate()
   const { scrollY } = useScroll()
 
-  // Neeche scroll = navbar chhup jata hai, upar scroll = wapas aata hai
+  // Hide the navbar when scrolling down, show it again when scrolling up
   useMotionValueEvent(scrollY, 'change', (y) => {
     const prev = scrollY.getPrevious() ?? 0
     setHidden(y > prev && y > 180)

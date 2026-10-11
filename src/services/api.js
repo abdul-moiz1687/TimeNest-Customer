@@ -12,7 +12,7 @@ export async function apiRequest(path, { method = 'GET', body, token } = {}) {
       ...(body && { body: JSON.stringify(body) }),
     })
   } catch {
-    throw new Error('Server se connect nahi ho paya. Backend chal raha hai?')
+    throw new Error('Could not reach the server. Please try again in a moment.')
   }
   const data = await res.json().catch(() => ({}))
   if (!res.ok) throw new Error(data.message || data.error || 'Something went wrong')
