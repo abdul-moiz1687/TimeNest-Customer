@@ -1,0 +1,61 @@
+import { apiRequest, API_BASE_URL } from './api'
+
+export const CATEGORIES = [
+  { name: 'Modern Wall Clocks', slug: 'modern', blurb: 'Clean lines for contemporary rooms.' },
+  { name: 'Luxury Wall Clocks', slug: 'luxury', blurb: 'Statement pieces with refined finishes.' },
+  { name: 'Wooden Wall Clocks', slug: 'wooden', blurb: 'Warm natural texture and craft.' },
+  { name: 'Decorative Wall Clocks', slug: 'decorative', blurb: 'Art for the wall that tells time.' },
+  { name: 'Office Wall Clocks', slug: 'office', blurb: 'Clear, quiet and professional.' },
+]
+
+const imgUrl = (i) => {
+  if (!i) return ''
+  const u = typeof i === 'string' ? i : i.url || i.secure_url || ''
+  return u.startsWith('http') || !u ? u : `${API_BASE_URL}${u.startsWith('/') ? '' : '/'}${u}`
+}
+
+// Backend ke alag field names ko ek standard shape mein badalta hai
+export function normalizeProduct(p = {}) {
+  const images = (Array.isArray(p.images) ? p.images : []).map(imgUrl).filter(Boolean)
+  const main = imgUrl(p.image) || images[0] || ''
+  const stock = p.stock ?? p.countInStock ?? p.quantity ?? p.inStock
+  return {
+    id: p._id || p.id,
+    slug: p.slug || '',
+    name: p.name || p.title || 'Wall Clock',
+    price: Number(p.price) || 0,
+    category: p.category || '',
+    description: p.description || '',
+    features: Array.isArray(p.features) ? p.features : [],
+    images: images.length ? images : main ? [main] : [],
+    image: main,
+    stock: typeof stock === 'boolean' ? (stock ? 99 : 0) : stock == null ? null : Number(stock),
+    averageRating: p.averageRating ?? p.rating ?? 0,
+    numReviews: p.numReviews ?? p.totalReviews ?? p.reviewCount ?? 0,
+  }
+}
+
+export async function getProducts(params = {}) {
+  const q = new URLSearchParams()
+  Object.entries(params).forEach(([k, v]) => v !== '' && v != null && q.set(k, v))
+  const data = await apiRequest(`/api/product?${q}`)
+  const list = Array.isArray(data) ? data : data.products || data.data || data.items || []
+  const total = data.total ?? data.totalProducts ?? data.count ?? list.length
+  const limit = Number(params.limit) || 12
+  const pages = data.totalPages ?? data.pages ?? Math.max(1, Math.ceil(total / limit))
+  return { products: list.map(normalizeProduct), total, pages }
+}
+
+export async function getProduct(idOrSlug) {
+  const isId = /^[a-f\d]{24}$/i.test(idOrSlug)
+  let data
+  try {
+    data = await apiRequest(isId ? `/api/product/${idOrSlug}` : `/api/product/slug/${idOrSlug}`)
+  } catch (e) {
+    if (isId) throw e
+    data = await apiRequest(`/api/product/${idOrSlug}`)
+  }
+  return normalizeProduct(data.product || data)
+}
+
+export const productPath = (p) => `/product/${p.slug || p.id}`

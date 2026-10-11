@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /cart
+Disallow: /checkout
+Disallow: /my-orders
+Disallow: /order-success
+
+Sitemap: https://www.timenest.example/sitemap.xml

@@ -1,0 +1,17 @@
+:root {
+  --color-bg: #0e0e0e;
+  --color-surface: #161616;
+  --color-ivory: #f5f0e6;
+  --color-muted: #a8a399;
+  --color-gold: #c9a96a;
+  --color-border: #2a2a2a;
+  --color-error: #e07a6b;
+  --color-ok: #8fbf8f;
+
+  --font-heading: 'Playfair Display Variable', Georgia, serif;
+  --font-body: 'Inter Variable', system-ui, sans-serif;
+
+  --container: 1280px;
+  --radius: 4px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
