@@ -5,4 +5,4 @@ Disallow: /checkout
 Disallow: /my-orders
 Disallow: /order-success
 
-Sitemap: https://www.timenest.example/sitemap.xml
+Sitemap: https://timenest-wall-clock-store.vercel.app/sitemap.xml

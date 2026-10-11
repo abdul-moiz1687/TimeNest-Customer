@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://www.timenest.example/</loc></url>
-  <url><loc>https://www.timenest.example/shop</loc></url>
-  <url><loc>https://www.timenest.example/category/modern</loc></url>
-  <url><loc>https://www.timenest.example/category/luxury</loc></url>
-  <url><loc>https://www.timenest.example/category/wooden</loc></url>
-  <url><loc>https://www.timenest.example/category/decorative</loc></url>
-  <url><loc>https://www.timenest.example/category/office</loc></url>
-  <url><loc>https://www.timenest.example/blog</loc></url>
-  <url><loc>https://www.timenest.example/about</loc></url>
-  <url><loc>https://www.timenest.example/contact</loc></url>
-  <url><loc>https://www.timenest.example/faq</loc></url>
-  <url><loc>https://www.timenest.example/blog/how-to-choose-wall-clock-size</loc></url>
-  <url><loc>https://www.timenest.example/blog/wall-clock-styles-explained</loc></url>
-  <url><loc>https://www.timenest.example/blog/where-to-hang-a-wall-clock</loc></url>
-  <url><loc>https://www.timenest.example/blog/caring-for-your-wall-clock</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/shop</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/category/modern</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/category/luxury</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/category/wooden</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/category/decorative</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/category/office</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/blog</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/about</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/contact</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/faq</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/blog/how-to-choose-wall-clock-size</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/blog/wall-clock-styles-explained</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/blog/where-to-hang-a-wall-clock</loc></url>
+  <url><loc>https://timenest-wall-clock-store.vercel.app/blog/caring-for-your-wall-clock</loc></url>
 </urlset>
