@@ -18,7 +18,11 @@ const imgUrl = (i) => {
 export function normalizeProduct(p = {}) {
   const images = (Array.isArray(p.images) ? p.images : []).map(imgUrl).filter(Boolean)
   const main = imgUrl(p.image) || images[0] || ''
-  const stock = p.stock ?? p.countInStock ?? p.quantity ?? p.inStock
+  let stock = p.stock ?? p.countInStock ?? p.quantity ?? p.inStock
+  // The backend stores availability as text, e.g. "In Stock" or "Out of Stock"
+  if (stock == null && typeof p.availability === 'string' && p.availability) {
+    stock = /out\s*of\s*stock|sold\s*out|unavailable/i.test(p.availability) ? 0 : 99
+  }
   return {
     id: p._id || p.id,
     slug: p.slug || '',
@@ -40,9 +44,11 @@ export async function getProducts(params = {}) {
   Object.entries(params).forEach(([k, v]) => v !== '' && v != null && q.set(k, v))
   const data = await apiRequest(`/api/product?${q}`)
   const list = Array.isArray(data) ? data : data.products || data.data || data.items || []
-  const total = data.total ?? data.totalProducts ?? data.count ?? list.length
+  // The backend returns `{ products, pagination: { totalProducts, totalPages, ... } }`
+  const pg = data.pagination || {}
+  const total = pg.totalProducts ?? data.total ?? data.totalProducts ?? data.count ?? list.length
   const limit = Number(params.limit) || 12
-  const pages = data.totalPages ?? data.pages ?? Math.max(1, Math.ceil(total / limit))
+  const pages = pg.totalPages ?? data.totalPages ?? data.pages ?? Math.max(1, Math.ceil(total / limit))
   return { products: list.map(normalizeProduct), total, pages }
 }
 
