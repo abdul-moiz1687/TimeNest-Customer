@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import Seo from '../components/Seo'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/format'
+import { optimizeImage } from '../services/productApi'
 
 export default function Cart() {
   const { items, subtotal, setQuantity, removeItem } = useCart()
@@ -16,7 +17,7 @@ export default function Cart() {
           <ul className="cart-list">
             {items.map((i) => (
               <li key={i.id}>
-                <Link to={`/product/${i.slug || i.id}`} className="cart-img">{i.image && <img src={i.image} alt={i.name} />}</Link>
+                <Link to={`/product/${i.slug || i.id}`} className="cart-img">{i.image && <img src={optimizeImage(i.image, 200)} alt={i.name} loading="lazy" />}</Link>
                 <div className="cart-info">
                   <Link to={`/product/${i.slug || i.id}`}><h3>{i.name}</h3></Link>
                   <p className="muted">{formatPrice(i.price)}</p>

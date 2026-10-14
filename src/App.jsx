@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { MotionConfig, motion } from 'motion/react'
 import { AuthProvider } from './context/AuthContext'
@@ -8,22 +8,22 @@ import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import Home from './pages/Home'
-import Shop from './pages/Shop'
-import Category from './pages/Category'
-import ProductDetails from './pages/ProductDetails'
-import Search from './pages/Search'
-import Cart from './pages/Cart'
-import Checkout from './pages/Checkout'
-import OrderSuccess from './pages/OrderSuccess'
-import MyOrders from './pages/MyOrders'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import About from './pages/About'
-import Contact from './pages/Contact'
-import FAQ from './pages/FAQ'
-import Blog from './pages/Blog'
-import BlogPost from './pages/BlogPost'
-import NotFound from './pages/NotFound'
+const Shop = lazy(() => import('./pages/Shop'))
+const Category = lazy(() => import('./pages/Category'))
+const ProductDetails = lazy(() => import('./pages/ProductDetails'))
+const Search = lazy(() => import('./pages/Search'))
+const Cart = lazy(() => import('./pages/Cart'))
+const Checkout = lazy(() => import('./pages/Checkout'))
+const OrderSuccess = lazy(() => import('./pages/OrderSuccess'))
+const MyOrders = lazy(() => import('./pages/MyOrders'))
+const Login = lazy(() => import('./pages/Login'))
+const Signup = lazy(() => import('./pages/Signup'))
+const About = lazy(() => import('./pages/About'))
+const Contact = lazy(() => import('./pages/Contact'))
+const FAQ = lazy(() => import('./pages/FAQ'))
+const Blog = lazy(() => import('./pages/Blog'))
+const BlogPost = lazy(() => import('./pages/BlogPost'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 import ScrollProgress from './components/ScrollProgress'
 import './styles/app.css'
 
@@ -44,6 +44,7 @@ export default function App() {
         <AnnouncementBar />
         <Navbar />
         <motion.div className="app-main" key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+          <Suspense fallback={<div className="page-loader"><span /></div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/shop" element={<Shop />} />
@@ -63,6 +64,7 @@ export default function App() {
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
         </motion.div>
         <Footer />
       </CartProvider>

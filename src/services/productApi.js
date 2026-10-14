@@ -39,9 +39,13 @@ export function normalizeProduct(p = {}) {
   }
 }
 
-export async function getProducts(params = {}) {
+export function getProducts(params = {}) {
   const q = new URLSearchParams()
   Object.entries(params).forEach(([k, v]) => v !== '' && v != null && q.set(k, v))
+  return cached(`list:${q}`, () => fetchProducts(q, params))
+}
+
+async function fetchProducts(q, params) {
   const data = await apiRequest(`/api/product?${q}`)
   const list = Array.isArray(data) ? data : data.products || data.data || data.items || []
   // The backend returns `{ products, pagination: { totalProducts, totalPages, ... } }`
@@ -52,7 +56,11 @@ export async function getProducts(params = {}) {
   return { products: list.map(normalizeProduct), total, pages }
 }
 
-export async function getProduct(idOrSlug) {
+export function getProduct(idOrSlug) {
+  return cached(`one:${idOrSlug}`, () => fetchProduct(idOrSlug))
+}
+
+async function fetchProduct(idOrSlug) {
   const isId = /^[a-f\d]{24}$/i.test(idOrSlug)
   let data
   try {
@@ -62,6 +70,26 @@ export async function getProduct(idOrSlug) {
     data = await apiRequest(`/api/product/${idOrSlug}`)
   }
   return normalizeProduct(data.product || data)
+}
+
+// Cloudinary can resize and compress on the fly: smaller, modern-format images load much faster
+export function optimizeImage(url, width) {
+  if (!url || !url.includes('res.cloudinary.com') || !url.includes('/upload/')) return url
+  return url.replace('/upload/', `/upload/f_auto,q_auto,w_${width}/`)
+}
+export const imageSrcSet = (url, widths = [400, 600, 900]) =>
+  url && url.includes('res.cloudinary.com') ? widths.map((w) => `${optimizeImage(url, w)} ${w}w`).join(', ') : undefined
+
+// Small in-memory cache: going back to a page shows data instantly, and duplicate requests are shared
+const cache = new Map()
+const TTL = 2 * 60 * 1000
+function cached(key, load) {
+  const hit = cache.get(key)
+  if (hit && Date.now() - hit.t < TTL) return hit.p
+  const p = load()
+  cache.set(key, { t: Date.now(), p })
+  p.catch(() => cache.delete(key))
+  return p
 }
 
 export const productPath = (p) => `/product/${p.slug || p.id}`

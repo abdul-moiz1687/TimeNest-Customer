@@ -362,3 +362,53 @@ input[aria-invalid='true'] { border-color: var(--color-error); }
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation-duration: 70s; }
 }
+
+/* ---------- product card v2 ---------- */
+.p-grid { gap: 1.8rem 1.4rem; }
+.pc { position: relative; display: flex; flex-direction: column; transition: transform 0.5s var(--ease); }
+.pc:hover { transform: translateY(-5px); }
+.pc-media { position: relative; aspect-ratio: 4 / 5; overflow: hidden; background: var(--color-surface); border: 1px solid var(--color-border); transition: border-color 0.4s, box-shadow 0.5s var(--ease); }
+.pc-media > a { display: block; height: 100%; }
+.pc-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 1.1s var(--ease); }
+.pc:hover .pc-media { border-color: rgba(201,169,106,0.55); box-shadow: 0 22px 55px rgba(0,0,0,0.55), 0 0 40px rgba(201,169,106,0.08); }
+.pc:hover .pc-media img { transform: scale(1.07); }
+.pc-tag { position: absolute; top: 12px; left: 12px; background: #000; color: var(--color-ivory); font-size: 0.68rem; padding: 4px 10px; letter-spacing: 0.14em; text-transform: uppercase; }
+.pc-quick { position: absolute; left: 12px; right: 12px; bottom: 12px; display: flex; align-items: center; justify-content: center; gap: 0.6rem; background: var(--color-gold); color: #111; border: 0; padding: 0.85rem; font-weight: 600; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; transform: translateY(150%); opacity: 0; transition: transform 0.5s var(--ease), opacity 0.35s, background 0.3s; }
+.pc:hover .pc-quick, .pc-quick:focus-visible, .pc-quick.done { transform: none; opacity: 1; }
+.pc-quick:hover:not(:disabled) { background: var(--color-ivory); }
+.pc-quick:disabled { display: none; }
+.pc-quick.done { background: var(--color-ivory); }
+@media (hover: none) {
+  .pc-quick { transform: none; opacity: 1; left: auto; right: 10px; bottom: 10px; width: 40px; height: 40px; padding: 0; border-radius: 50%; }
+  .pc-quick span { display: none; }
+}
+.pc-body { padding-top: 1rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.pc-cat { color: var(--color-muted); font-size: 0.68rem; letter-spacing: 0.2em; text-transform: uppercase; }
+.pc-body h3 { font-family: var(--font-heading); font-weight: 500; font-size: 1.2rem; line-height: 1.25; }
+.pc-body h3 a { background: linear-gradient(var(--color-gold), var(--color-gold)) 0 100% / 0 1px no-repeat; transition: background-size 0.5s var(--ease), color 0.3s; }
+.pc:hover .pc-body h3 a { background-size: 100% 1px; }
+.pc-meta { display: flex; justify-content: space-between; align-items: center; gap: 0.6rem; margin-top: 0.15rem; }
+.pc-meta strong { color: var(--color-gold); font-weight: 600; font-size: 1.02rem; }
+.pc-rating { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--color-muted); }
+.pc-skel { display: flex; flex-direction: column; gap: 0.7rem; }
+.pc-skel-img { aspect-ratio: 4 / 5; min-height: 0; }
+.pc-skel-line { height: 14px; min-height: 0; width: 80%; }
+.pc-skel-line.short { width: 45%; }
+.page-loader { min-height: 55vh; display: grid; place-items: center; }
+.page-loader span { width: 34px; height: 34px; border: 2px solid var(--color-border); border-top-color: var(--color-gold); border-radius: 50%; animation: spin-loader 0.8s linear infinite; }
+@keyframes spin-loader { to { transform: rotate(360deg); } }
+
+/* ---------- mobile shop layout ---------- */
+.filters-toggle { display: none; }
+@media (max-width: 800px) {
+  .filters-toggle { display: inline-flex; align-items: center; justify-content: center; width: 100%; padding: 0.8rem; border: 1px solid var(--color-border); background: none; color: var(--color-ivory); letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.75rem; margin-bottom: 1rem; }
+  .filters-wrap .filters { display: none; }
+  .filters-wrap.open .filters { display: flex; }
+}
+@media (max-width: 600px) {
+  .p-grid { grid-template-columns: repeat(2, 1fr); gap: 1.4rem 0.8rem; }
+  .pc-body h3 { font-size: 1rem; }
+  .pc-meta strong { font-size: 0.92rem; }
+  .pc-cat { font-size: 0.62rem; letter-spacing: 0.14em; }
+  .pc-rating small { display: none; }
+}

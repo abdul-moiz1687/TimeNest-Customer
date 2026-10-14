@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import Seo from '../components/Seo'
 import Stars from '../components/Stars'
 import ReviewSection from '../components/reviews/ReviewSection'
-import { getProduct } from '../services/productApi'
+import { getProduct, optimizeImage } from '../services/productApi'
 import { getReviews } from '../services/reviewApi'
 import { useCart } from '../context/CartContext'
 import { formatPrice, SITE_URL } from '../utils/format'
@@ -70,13 +70,13 @@ export default function ProductDetails() {
       <div className="detail">
         <div className="gallery">
           <div className="gallery-main">
-            {product.images[active] ? <img src={product.images[active]} alt={product.name} /> : <div className="p-img-empty">No image</div>}
+            {product.images[active] ? <img src={optimizeImage(product.images[active], 1100)} alt={product.name} decoding="async" fetchPriority="high" /> : <div className="p-img-empty">No image</div>}
           </div>
           {product.images.length > 1 && (
             <div className="thumbs">
               {product.images.map((src, i) => (
                 <button key={src} className={i === active ? 'active' : ''} onClick={() => setActive(i)} aria-label={`Image ${i + 1}`}>
-                  <img src={src} alt="" loading="lazy" />
+                  <img src={optimizeImage(src, 160)} alt="" loading="lazy" />
                 </button>
               ))}
             </div>

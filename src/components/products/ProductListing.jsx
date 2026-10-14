@@ -11,6 +11,7 @@ const LIMIT = 12
 export default function ProductListing({ fixedCategory }) {
   const [sp, setSp] = useSearchParams()
   const [state, setState] = useState({ loading: true, error: '', products: [], total: 0, pages: 1 })
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const search = sp.get('search') || ''
   const category = fixedCategory || sp.get('category') || ''
@@ -34,6 +35,7 @@ export default function ProductListing({ fixedCategory }) {
     if (v.minPrice) next.minPrice = v.minPrice
     if (v.maxPrice) next.maxPrice = v.maxPrice
     setSp(next)
+    setFiltersOpen(false)
   }
   const goPage = (n) => {
     const next = Object.fromEntries(sp)
@@ -44,7 +46,10 @@ export default function ProductListing({ fixedCategory }) {
 
   return (
     <div className="listing">
-      <aside>
+      <aside className={`filters-wrap ${filtersOpen ? 'open' : ''}`}>
+        <button type="button" className="filters-toggle" onClick={() => setFiltersOpen(!filtersOpen)} aria-expanded={filtersOpen}>
+          {filtersOpen ? 'Hide filters' : 'Filters'}
+        </button>
         <ProductFilters
           key={sp.toString()}
           values={{ search, category, minPrice, maxPrice }}

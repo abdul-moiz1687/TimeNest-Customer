@@ -5,12 +5,15 @@ import { motion } from 'motion/react'
 const HEADLINE = 'Timeless Design. Made to Stand Out.'.split(' ')
 const ease = [0.22, 1, 0.36, 1]
 
+// Skip the video on Data Saver or very slow connections; the poster image is shown instead
+const saveData = typeof navigator !== 'undefined' && (navigator.connection?.saveData || /2g/.test(navigator.connection?.effectiveType || ''))
+
 export default function Hero() {
   const videoRef = useRef(null)
 
   useEffect(() => {
     const v = videoRef.current
-    if (!v) return
+    if (!v || saveData) return
     // React does not always render the `muted` attribute, and browsers block unmuted autoplay
     v.muted = true
     v.defaultMuted = true
@@ -30,7 +33,7 @@ export default function Hero() {
 
   return (
     <section className="hero">
-      <video
+      {!saveData && <video
         ref={videoRef}
         className="hero-video"
         poster="/images/hero/hero-poster.jpg"
@@ -38,12 +41,12 @@ export default function Hero() {
         loop
         playsInline
         disableRemotePlayback
-        preload="auto"
+        preload="metadata"
         aria-hidden="true"
         onError={() => console.warn('Hero video failed to load. Check /videos/timenest-hero.mp4')}
       >
         <source src="/videos/timenest-hero.mp4" type="video/mp4" />
-      </video>
+      </video>}
       <div className="hero-overlay" />
       <div className="container hero-content">
         <motion.p className="eyebrow" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8 }}>TimeNest</motion.p>
