@@ -7,6 +7,9 @@ import { formatPrice } from '../../utils/format'
 import { useCart } from '../../context/CartContext'
 import Stars from '../Stars'
 
+// On touch screens the card nearest the middle of the screen gets highlighted while scrolling
+const TOUCH = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches
+
 // 3D tilt only on devices with a mouse, and not for users who prefer reduced motion
 const TILT_OK = typeof window !== 'undefined'
   && window.matchMedia('(hover: hover) and (pointer: fine)').matches
@@ -23,6 +26,14 @@ export default function ProductCard({ product }) {
     const t = setTimeout(() => setAdded(false), 1600)
     return () => clearTimeout(t)
   }, [added])
+
+  useEffect(() => {
+    const el = ref.current
+    if (!TOUCH || !el) return
+    const io = new IntersectionObserver(([e]) => el.classList.toggle('in-focus', e.isIntersecting), { rootMargin: '-38% 0px -38% 0px' })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
 
   const add = () => { addItem(product); setAdded(true) }
 

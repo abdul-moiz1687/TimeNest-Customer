@@ -78,11 +78,12 @@ function shadowTexture() {
   return new THREE.CanvasTexture(cv)
 }
 
-export function createClockScene(container, { onReady } = {}) {
+// lite: simpler rendering for weak phones. calm: no automatic motion (reduced-motion users), the clock only moves when touched.
+export function createClockScene(container, { onReady, lite = false, calm = false } = {}) {
   const w = container.clientWidth || 600
   const h = container.clientHeight || 600
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' })
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.5 : 2))
+  const renderer = new THREE.WebGLRenderer({ antialias: !lite, alpha: true, powerPreference: 'high-performance' })
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, lite ? 1 : window.innerWidth < 700 ? 1.5 : 2))
   renderer.setSize(w, h, false)
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 1.15
@@ -90,14 +91,20 @@ export function createClockScene(container, { onReady } = {}) {
   container.appendChild(renderer.domElement)
 
   const scene = new THREE.Scene()
-  const pmrem = new THREE.PMREMGenerator(renderer)
-  const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
-  scene.environment = envTex
+  let pmrem = null
+  let envTex = null
+  if (!lite) {
+    pmrem = new THREE.PMREMGenerator(renderer)
+    envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+    scene.environment = envTex
+  } else {
+    scene.add(new THREE.AmbientLight(0xffffff, 1.1), new THREE.HemisphereLight(0xfff4e0, 0x222222, 0.8))
+  }
 
   const camera = new THREE.PerspectiveCamera(32, w / h, 0.1, 50)
   camera.position.set(0, 0, 9.6)
 
-  const key = new THREE.DirectionalLight(0xfff1d6, 1.6)
+  const key = new THREE.DirectionalLight(0xfff1d6, lite ? 2.2 : 1.6)
   key.position.set(3, 4, 6)
   scene.add(key)
 
@@ -110,7 +117,7 @@ export function createClockScene(container, { onReady } = {}) {
   faceTex.anisotropy = renderer.capabilities.getMaxAnisotropy()
 
   const woodTex = woodTexture()
-  const ringMat = new THREE.MeshStandardMaterial({ color: f.ring, metalness: f.metal, roughness: f.rough, envMapIntensity: 1.2 })
+  const ringMat = new THREE.MeshStandardMaterial({ color: f.ring, metalness: lite ? Math.min(f.metal, 0.4) : f.metal, roughness: f.rough, envMapIntensity: 1.2 })
   const bodyMat = new THREE.MeshStandardMaterial({ color: f.body, metalness: 0.4, roughness: 0.6 })
   const faceMat = new THREE.MeshStandardMaterial({ map: faceTex, roughness: 0.9, metalness: 0, envMapIntensity: 0.3 })
   const handMat = new THREE.MeshStandardMaterial({ color: f.hand, metalness: 0.8, roughness: 0.3 })
@@ -137,7 +144,8 @@ export function createClockScene(container, { onReady } = {}) {
   const secHand = hand(1.75, 0.025, secMat, 0.31, 0.32)
   const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.11, 0.11, 0.12, 32).rotateX(Math.PI / 2), ringMat)
   cap.position.z = 0.32
-  clock.add(body, ring, face, glass, hourHand, minHand, secHand, cap)
+  clock.add(body, ring, face, hourHand, minHand, secHand, cap)
+  if (!lite) clock.add(glass)
   scene.add(clock)
 
   const shadow = new THREE.Mesh(
@@ -152,7 +160,7 @@ export function createClockScene(container, { onReady } = {}) {
     const n = FINISHES[name]
     if (!n || n === f) return
     f = n
-    ringMat.color.setHex(n.ring); ringMat.metalness = n.metal; ringMat.roughness = n.rough
+    ringMat.color.setHex(n.ring); ringMat.metalness = lite ? Math.min(n.metal, 0.4) : n.metal; ringMat.roughness = n.rough
     ringMat.map = n.wood ? woodTex : null
     ringMat.needsUpdate = true
     bodyMat.color.setHex(n.body)
@@ -164,7 +172,8 @@ export function createClockScene(container, { onReady } = {}) {
   }
 
   // The clock follows the pointer (mouse or touch) and gently sways when the pointer is away
-  const target = { x: 0, y: 0 }
+  const target = { x: calm ? -0.06 : 0, y: calm ? 0.28 : 0 }
+  clock.rotation.set(target.x, target.y, 0)
   let pointerActive = false
   const onMove = (e) => {
     const r = container.getBoundingClientRect()
@@ -196,13 +205,13 @@ export function createClockScene(container, { onReady } = {}) {
     minHand.rotation.z = -(min / 60) * TAU
     hourHand.rotation.z = -(hr / 12) * TAU
 
-    if (!pointerActive) {
+    if (!pointerActive && !calm) {
       target.y = Math.sin(t * 0.5) * 0.35
       target.x = Math.cos(t * 0.4) * 0.12
     }
     clock.rotation.y += (target.y - clock.rotation.y) * 0.07
     clock.rotation.x += (target.x - clock.rotation.x) * 0.07
-    clock.position.y = Math.sin(t * 0.9) * 0.06
+    clock.position.y = calm ? 0 : Math.sin(t * 0.9) * 0.06
     pulse *= 0.9
     clock.scale.setScalar(1 + pulse * 0.05)
     shadow.position.x = 0.15 - clock.rotation.y * 0.9
@@ -241,7 +250,7 @@ export function createClockScene(container, { onReady } = {}) {
       container.removeEventListener('pointerleave', onLeave)
       scene.traverse((o) => { if (o.geometry) o.geometry.dispose() })
       ;[ringMat, bodyMat, faceMat, handMat, secMat, glassMat, shadow.material].forEach((m) => m.dispose())
-      faceTex.dispose(); woodTex.dispose(); shadow.material.map?.dispose(); envTex.dispose(); pmrem.dispose()
+      faceTex.dispose(); woodTex.dispose(); shadow.material.map?.dispose(); envTex?.dispose(); pmrem?.dispose()
       renderer.dispose()
       renderer.forceContextLoss()
       renderer.domElement.remove()
