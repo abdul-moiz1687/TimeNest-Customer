@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faPlus } from '@fortawesome/free-solid-svg-icons'
@@ -7,7 +7,13 @@ import { formatPrice } from '../../utils/format'
 import { useCart } from '../../context/CartContext'
 import Stars from '../Stars'
 
+// 3D tilt only on devices with a mouse, and not for users who prefer reduced motion
+const TILT_OK = typeof window !== 'undefined'
+  && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 export default function ProductCard({ product }) {
+  const ref = useRef(null)
   const { addItem } = useCart()
   const [added, setAdded] = useState(false)
   const soldOut = product.stock === 0
@@ -20,8 +26,26 @@ export default function ProductCard({ product }) {
 
   const add = () => { addItem(product); setAdded(true) }
 
+  const onMove = (e) => {
+    if (!TILT_OK || !ref.current) return
+    const el = ref.current
+    const r = el.getBoundingClientRect()
+    const x = (e.clientX - r.left) / r.width
+    const y = (e.clientY - r.top) / r.height
+    el.style.setProperty('--ry', `${((x - 0.5) * 9).toFixed(2)}deg`)
+    el.style.setProperty('--rx', `${((0.5 - y) * 7).toFixed(2)}deg`)
+    el.style.setProperty('--mx', `${(x * 100).toFixed(1)}%`)
+    el.style.setProperty('--my', `${(y * 100).toFixed(1)}%`)
+  }
+  const onLeave = () => {
+    const el = ref.current
+    if (!el) return
+    el.style.setProperty('--rx', '0deg')
+    el.style.setProperty('--ry', '0deg')
+  }
+
   return (
-    <article className="pc">
+    <article className="pc" ref={ref} onPointerMove={onMove} onPointerLeave={onLeave}>
       <div className="pc-media">
         <Link to={productPath(product)} aria-label={product.name}>
           {product.image ? (

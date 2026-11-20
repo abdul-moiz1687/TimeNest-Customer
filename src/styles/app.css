@@ -412,3 +412,25 @@ input[aria-invalid='true'] { border-color: var(--color-error); }
   .pc-cat { font-size: 0.62rem; letter-spacing: 0.14em; }
   .pc-rating small { display: none; }
 }
+
+/* ---------- 3D clock showcase ---------- */
+.showcase { display: grid; grid-template-columns: 1fr 1.1fr; gap: 3rem; align-items: center; }
+.showcase-copy { display: flex; flex-direction: column; gap: 1.2rem; align-items: flex-start; }
+.showcase-copy h2 { font-size: clamp(2rem, 4vw, 3.2rem); }
+.finishes { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 0.4rem 0 0.6rem; }
+.finishes button { display: inline-flex; align-items: center; gap: 0.6rem; background: none; border: 1px solid var(--color-border); color: var(--color-muted); padding: 0.55rem 1rem; font-size: 0.85rem; transition: all 0.3s var(--ease); }
+.finishes button i { width: 14px; height: 14px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.25); }
+.finishes button:hover { color: var(--color-ivory); border-color: var(--color-gold); }
+.finishes button.on { border-color: var(--color-gold); color: var(--color-ivory); background: rgba(201,169,106,0.08); }
+.showcase-stage { position: relative; width: min(100%, 620px); aspect-ratio: 1; justify-self: center; }
+.showcase-stage::before { content: ''; position: absolute; inset: 12%; border-radius: 50%; background: radial-gradient(circle, rgba(201,169,106,0.22), transparent 70%); filter: blur(30px); }
+.showcase-canvas { position: absolute; inset: 0; }
+.showcase-fallback { position: absolute; inset: 0; padding: 9%; display: grid; place-items: center; transition: opacity 0.8s ease; pointer-events: none; }
+.showcase-fallback.hide { opacity: 0; }
+@media (max-width: 860px) { .showcase { grid-template-columns: 1fr; gap: 1.5rem; } .showcase-stage { order: -1; width: min(100%, 440px); } }
+
+/* ---------- product card 3D tilt ---------- */
+.pc { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); transition: transform 0.25s ease-out; will-change: transform; }
+.pc:hover { transform: perspective(900px) translateY(-5px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+.pc-media::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255,240,205,0.22), transparent 55%); transition: opacity 0.3s; }
+.pc:hover .pc-media::after { opacity: 1; }

@@ -8,6 +8,7 @@ import FeaturedProducts from '../components/home/FeaturedProducts'
 import BlogPreview from '../components/home/BlogPreview'
 import Reveal from '../components/Reveal'
 import Marquee from '../components/home/Marquee'
+import ClockShowcase from '../components/home/ClockShowcase'
 
 const values = [
   { icon: faPenRuler, title: 'Considered design', text: 'Every style is chosen to look good on a wall, not just in a photo.' },
@@ -28,6 +29,7 @@ export default function Home() {
       <Marquee />
       <Reveal><Categories /></Reveal>
       <Reveal><FeaturedProducts /></Reveal>
+      <ClockShowcase />
       <Reveal>
       <section className="section values">
         <div className="container values-grid">
