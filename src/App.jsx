@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect } from 'react'
+import { Suspense, lazy, useEffect, useState } from 'react'
 import { Routes, Route, useLocation } from 'react-router-dom'
 import { MotionConfig, motion } from 'motion/react'
 import { AuthProvider } from './context/AuthContext'
@@ -9,6 +9,19 @@ import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
 import MiniCart from './components/layout/MiniCart'
 import Home from './pages/Home'
+// The assistant is loaded after the page is idle, so it never slows the first load. Set VITE_CHATBOT=off to hide it.
+const ChatWidget = lazy(() => import('./components/chat/ChatWidget'))
+const CHAT_ON = import.meta.env.VITE_CHATBOT !== 'off'
+
+function DeferredChat() {
+  const [ready, setReady] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setReady(true), 2500)
+    return () => clearTimeout(t)
+  }, [])
+  return ready && CHAT_ON ? <Suspense fallback={null}><ChatWidget /></Suspense> : null
+}
+
 const Shop = lazy(() => import('./pages/Shop'))
 const Category = lazy(() => import('./pages/Category'))
 const ProductDetails = lazy(() => import('./pages/ProductDetails'))
@@ -70,6 +83,7 @@ export default function App() {
           </Suspense>
         </motion.div>
         <Footer />
+        <DeferredChat />
       </CartProvider>
     </AuthProvider>
     </MotionConfig>
