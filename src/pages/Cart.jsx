@@ -3,6 +3,9 @@ import Seo from '../components/Seo'
 import { useCart } from '../context/CartContext'
 import { formatPrice } from '../utils/format'
 import { optimizeImage } from '../services/productApi'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
+import { waLink } from '../utils/whatsapp'
 
 export default function Cart() {
   const { items, subtotal, setQuantity, removeItem } = useCart()
@@ -39,6 +42,19 @@ export default function Cart() {
             <div className="sum-row"><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
             <p className="muted small">The final total is confirmed by the store when you place the order.</p>
             <Link to="/checkout" className="btn btn-gold block">Checkout</Link>
+            {!waLink('x') && import.meta.env.DEV && (
+              <p className="dev-hint">Dev note: the WhatsApp button is hidden because VITE_WHATSAPP_NUMBER is not set. Add it to .env.local, then restart npm run dev.</p>
+            )}
+            {waLink('x') && (
+              <a
+                className="btn btn-wa block"
+                target="_blank"
+                rel="noreferrer"
+                href={waLink(`Hi TimeNest, I would like to order:\n${items.map((i) => `- ${i.name} x ${i.quantity} (${formatPrice(i.price * i.quantity)})`).join('\n')}\nSubtotal: ${formatPrice(subtotal)}\nPlease confirm the total and delivery.`)}
+              >
+                <FontAwesomeIcon icon={faWhatsapp} /> Order on WhatsApp
+              </a>
+            )}
           </aside>
         </div>
       )}

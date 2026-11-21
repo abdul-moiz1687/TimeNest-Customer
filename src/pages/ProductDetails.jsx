@@ -1,6 +1,12 @@
-import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useParams } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'
 import Seo from '../components/Seo'
+import RelatedProducts from '../components/products/RelatedProducts'
+import RecentlyViewed from '../components/products/RecentlyViewed'
+import { pushRecent } from '../utils/recent'
+import { waLink as buildWaLink } from '../utils/whatsapp'
 import Stars from '../components/Stars'
 import ReviewSection from '../components/reviews/ReviewSection'
 import { getProduct, optimizeImage } from '../services/productApi'
@@ -9,21 +15,30 @@ import { useCart } from '../context/CartContext'
 import { formatPrice, SITE_URL } from '../utils/format'
 import NotFound from './NotFound'
 
+const sameProduct = (p, slug) => !!p && (p.slug === slug || p.id === slug)
+
 export default function ProductDetails() {
   const { slug } = useParams()
   const { addItem } = useCart()
-  const [product, setProduct] = useState(null)
+  const location = useLocation()
+  const [fetched, setFetched] = useState(null)
   const [status, setStatus] = useState('loading')
+  const [showBar, setShowBar] = useState(false)
+  const buyRef = useRef(null)
+  // The card the visitor clicked passes its data along, so the page can render instantly while the full product loads
+  const seed = sameProduct(location.state?.product, slug) ? location.state.product : null
+  const product = sameProduct(fetched, slug) ? fetched : seed
   const [reviews, setReviews] = useState(null)
   const [active, setActive] = useState(0)
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
+  const zoomRef = useRef(null)
 
   useEffect(() => {
     let alive = true
-    setStatus('loading'); setActive(0); setQty(1)
+    setStatus('loading'); setActive(0); setQty(1); setReviews(null)
     getProduct(slug)
-      .then((p) => { if (alive) { setProduct(p); setStatus('ok') } })
+      .then((p) => { if (alive) { setFetched(p); setStatus('ok') } })
       .catch(() => alive && setStatus('error'))
     return () => { alive = false }
   }, [slug])
@@ -33,9 +48,18 @@ export default function ProductDetails() {
   }, [])
 
   useEffect(() => { if (product?.id) loadReviews(product.id) }, [product?.id, loadReviews])
+  useEffect(() => { if (product?.id) pushRecent(product) }, [product])
+  // Sticky "Add to cart" bar (mobile): shown once the main buy buttons have scrolled out of view
+  useEffect(() => {
+    const el = buyRef.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => setShowBar(!e.isIntersecting && e.boundingClientRect.top < 0))
+    io.observe(el)
+    return () => io.disconnect()
+  }, [product?.id])
 
-  if (status === 'loading') return <main className="container page"><div className="skeleton detail-skel" /></main>
-  if (status === 'error' || !product) return <NotFound />
+  if (!product && status !== 'error') return <main className="container page"><div className="skeleton detail-skel" /></main>
+  if (!product) return <NotFound />
 
   const soldOut = product.stock === 0
   const path = `/product/${product.slug || product.id}`
@@ -61,6 +85,14 @@ export default function ProductDetails() {
   ]
 
   const add = () => { addItem(product, qty); setAdded(true); setTimeout(() => setAdded(false), 1800) }
+  const onZoom = (e) => {
+    const el = zoomRef.current
+    if (!el) return
+    const r = el.getBoundingClientRect()
+    el.style.setProperty('--zx', `${(((e.clientX - r.left) / r.width) * 100).toFixed(1)}%`)
+    el.style.setProperty('--zy', `${(((e.clientY - r.top) / r.height) * 100).toFixed(1)}%`)
+  }
+  const waLink = buildWaLink(`Hi TimeNest, I would like to order: ${product.name} (${formatPrice(product.price)})\n${window.location.href}`)
 
   return (
     <main className="container page">
@@ -69,8 +101,8 @@ export default function ProductDetails() {
 
       <div className="detail">
         <div className="gallery">
-          <div className="gallery-main">
-            {product.images[active] ? <img src={optimizeImage(product.images[active], 1100)} alt={product.name} decoding="async" fetchPriority="high" /> : <div className="p-img-empty">No image</div>}
+          <div className="gallery-main" ref={zoomRef} onPointerMove={onZoom}>
+            {product.images[active] ? <img src={optimizeImage(product.images[active], 1100)} alt={product.name} decoding="async" fetchPriority="high" style={{ viewTransitionName: `pimg-${product.id}` }} /> : <div className="p-img-empty">No image</div>}
           </div>
           {product.images.length > 1 && (
             <div className="thumbs">
@@ -97,7 +129,7 @@ export default function ProductDetails() {
           {product.features.length > 0 && (
             <ul className="features">{product.features.map((f) => <li key={f}>{f}</li>)}</ul>
           )}
-          <div className="buy">
+          <div className="buy" ref={buyRef}>
             <div className="qty">
               <button onClick={() => setQty(Math.max(1, qty - 1))} aria-label="Decrease">−</button>
               <span>{qty}</span>
@@ -105,11 +137,26 @@ export default function ProductDetails() {
             </div>
             <button className="btn btn-gold" disabled={soldOut} onClick={add}>{added ? 'Added ✓' : 'Add to cart'}</button>
           </div>
+          {waLink && (
+            <a className="btn btn-wa" href={waLink} target="_blank" rel="noreferrer">
+              <FontAwesomeIcon icon={faWhatsapp} /> Order on WhatsApp
+            </a>
+          )}
+          {!waLink && import.meta.env.DEV && (
+            <p className="dev-hint">Dev note: the WhatsApp button is hidden because VITE_WHATSAPP_NUMBER is not set. Add it to .env.local, then restart npm run dev.</p>
+          )}
           <p className="muted small">Payment: Cash on Delivery</p>
         </div>
       </div>
 
       <ReviewSection productId={product.id} data={reviews} onSubmitted={() => loadReviews(product.id)} />
+      <div className={`sticky-buy ${showBar ? 'show' : ''}`} aria-hidden={!showBar}>
+        <div><strong>{formatPrice(product.price)}</strong><span className="muted small">{product.name}</span></div>
+        {waLink && <a className="btn btn-wa-icon" href={waLink} target="_blank" rel="noreferrer" aria-label="Order on WhatsApp" tabIndex={showBar ? 0 : -1}><FontAwesomeIcon icon={faWhatsapp} /></a>}
+        <button className="btn btn-gold" disabled={soldOut} onClick={add} tabIndex={showBar ? 0 : -1}>{added ? 'Added ✓' : 'Add to cart'}</button>
+      </div>
+      <RelatedProducts product={product} />
+      <RecentlyViewed key={product.id} currentId={product.id} />
     </main>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useViewTransitionNavigate } from '../../utils/viewTransition'
 import { Link } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faCheck, faPlus } from '@fortawesome/free-solid-svg-icons'
@@ -15,8 +16,11 @@ const TILT_OK = typeof window !== 'undefined'
   && window.matchMedia('(hover: hover) and (pointer: fine)').matches
   && !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
+const preloadProductPage = () => import('../../pages/ProductDetails')
+
 export default function ProductCard({ product }) {
   const ref = useRef(null)
+  const goTo = useViewTransitionNavigate()
   const { addItem } = useCart()
   const [added, setAdded] = useState(false)
   const soldOut = product.stock === 0
@@ -36,6 +40,15 @@ export default function ProductCard({ product }) {
   }, [])
 
   const add = () => { addItem(product); setAdded(true) }
+
+  // Plain clicks morph the card image into the product page image; ctrl/cmd-click still opens a new tab
+  const open = (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault()
+    const img = ref.current?.querySelector('.pc-media img')
+    if (img) img.style.viewTransitionName = `pimg-${product.id}`
+    goTo(productPath(product), { state: { product, vt: true } })
+  }
 
   const onMove = (e) => {
     if (!TILT_OK || !ref.current) return
@@ -58,7 +71,7 @@ export default function ProductCard({ product }) {
   return (
     <article className="pc" ref={ref} onPointerMove={onMove} onPointerLeave={onLeave}>
       <div className="pc-media">
-        <Link to={productPath(product)} aria-label={product.name}>
+        <Link to={productPath(product)} aria-label={product.name} onClick={open} onPointerEnter={preloadProductPage}>
           {product.image ? (
             <img
               src={optimizeImage(product.image, 600)}
@@ -78,7 +91,7 @@ export default function ProductCard({ product }) {
       </div>
       <div className="pc-body">
         <p className="pc-cat">{String(product.category).replace(' Wall Clocks', '')}</p>
-        <h3><Link to={productPath(product)}>{product.name}</Link></h3>
+        <h3><Link to={productPath(product)} onClick={open} onPointerEnter={preloadProductPage}>{product.name}</Link></h3>
         <div className="pc-meta">
           <strong>{formatPrice(product.price)}</strong>
           {product.numReviews > 0 && <span className="pc-rating"><Stars value={product.averageRating} size="0.75rem" /> <small>({product.numReviews})</small></span>}

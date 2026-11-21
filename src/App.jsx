@@ -7,6 +7,7 @@ import AnnouncementBar from './components/layout/AnnouncementBar'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import ProtectedRoute from './components/layout/ProtectedRoute'
+import MiniCart from './components/layout/MiniCart'
 import Home from './pages/Home'
 const Shop = lazy(() => import('./pages/Shop'))
 const Category = lazy(() => import('./pages/Category'))
@@ -34,7 +35,8 @@ function ScrollToTop() {
 }
 
 export default function App() {
-  const { pathname } = useLocation()
+  const location = useLocation()
+  const { pathname } = location
   return (
     <MotionConfig reducedMotion="user">
     <AuthProvider>
@@ -43,7 +45,8 @@ export default function App() {
         <ScrollProgress />
         <AnnouncementBar />
         <Navbar />
-        <motion.div className="app-main" key={pathname} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+        <MiniCart />
+        <motion.div className="app-main" key={pathname} initial={location.state?.vt ? false : { opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}>
           <Suspense fallback={<div className="page-loader"><span /></div>}>
           <Routes>
             <Route path="/" element={<Home />} />

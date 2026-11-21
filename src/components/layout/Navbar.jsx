@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBagShopping, faBars, faMagnifyingGlass, faUser, faXmark, faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import { faBagShopping, faBars, faUser, faXmark, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
+import SearchBox from './SearchBox'
 
 const LINKS = [
   { to: '/shop', label: 'Shop' },
@@ -23,10 +24,8 @@ export default function Navbar() {
   const [open, setOpen] = useState(false)
   const [hidden, setHidden] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const [q, setQ] = useState('')
   const { count } = useCart()
   const { isLoggedIn, user, logout } = useAuth()
-  const navigate = useNavigate()
   const { scrollY } = useScroll()
 
   // Hide the navbar when scrolling down, show it again when scrolling up
@@ -44,13 +43,6 @@ export default function Navbar() {
   }, [open])
 
   const close = () => setOpen(false)
-  const onSearch = (e) => {
-    e.preventDefault()
-    if (!q.trim()) return
-    navigate(`/shop?search=${encodeURIComponent(q.trim())}`)
-    setQ('')
-    close()
-  }
 
   return (
     <>
@@ -67,10 +59,7 @@ export default function Navbar() {
           </nav>
 
           <div className="nb-actions">
-            <form className="nb-search" onSubmit={onSearch} role="search">
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search" aria-label="Search clocks" />
-              <button type="submit" aria-label="Search"><FontAwesomeIcon icon={faMagnifyingGlass} /></button>
-            </form>
+            <SearchBox variant="nav" />
 
             {isLoggedIn ? (
               <>
@@ -115,10 +104,7 @@ export default function Navbar() {
                 <button className="icon-btn" onClick={close} aria-label="Close menu"><FontAwesomeIcon icon={faXmark} /></button>
               </div>
 
-              <form className="drawer-search" onSubmit={onSearch} role="search">
-                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search clocks" aria-label="Search clocks" />
-                <button type="submit" aria-label="Search"><FontAwesomeIcon icon={faMagnifyingGlass} /></button>
-              </form>
+              <SearchBox variant="drawer" onDone={close} />
 
               <motion.nav className="drawer-links" variants={listVariants} initial="closed" animate="open" aria-label="Mobile">
                 {LINKS.map((l) => (
