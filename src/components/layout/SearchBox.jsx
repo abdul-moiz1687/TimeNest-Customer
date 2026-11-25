@@ -11,6 +11,7 @@ export default function SearchBox({ variant = 'nav', onDone }) {
   const [state, setState] = useState({ loading: false, items: [] })
   const [open, setOpen] = useState(false)
   const boxRef = useRef(null)
+  const inputRef = useRef(null)
   const navigate = useNavigate()
   const term = q.trim()
 
@@ -34,6 +35,19 @@ export default function SearchBox({ variant = 'nav', onDone }) {
     return () => { document.removeEventListener('pointerdown', onDoc); document.removeEventListener('keydown', onKey) }
   }, [])
 
+  // Press "/" anywhere (when not typing) to jump to the search box, like on modern sites
+  useEffect(() => {
+    if (variant !== 'nav') return
+    const onKey = (e) => {
+      if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.target.matches?.('input, textarea, select, [contenteditable="true"]')) return
+      e.preventDefault()
+      inputRef.current?.focus()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [variant])
+
   const finish = () => { setOpen(false); setQ(''); onDone?.() }
   const submit = (e) => {
     e.preventDefault()
@@ -47,6 +61,7 @@ export default function SearchBox({ variant = 'nav', onDone }) {
     <div className={`sb sb-${variant}`} ref={boxRef}>
       <form className={variant === 'nav' ? 'nb-search' : 'drawer-search'} onSubmit={submit} role="search">
         <input
+          ref={inputRef}
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
@@ -54,6 +69,7 @@ export default function SearchBox({ variant = 'nav', onDone }) {
           aria-label="Search clocks"
           autoComplete="off"
         />
+        {variant === 'nav' && !q && <kbd className="sb-kbd" aria-hidden="true">/</kbd>}
         <button type="submit" aria-label="Search"><FontAwesomeIcon icon={faMagnifyingGlass} /></button>
       </form>
       {show && (
